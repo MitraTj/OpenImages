@@ -1,4 +1,4 @@
- Adapted from Detectron.pytorch/lib/datasets/json_dataset.py
+# Adapted from Detectron.pytorch/lib/datasets/json_dataset.py
 # for this project by Ji Zhang, 2019
 #-----------------------------------------------------------------------------
 # Copyright (c) 2017-present, Facebook, Inc.
@@ -46,12 +46,13 @@ import utils.boxes as box_utils
 import utils_rel.boxes_rel as box_utils_rel
 from core.config import cfg
 from utils.timer import Timer
-from .dataset_catalog_rel import ANN_FN
-from .dataset_catalog_rel import ANN_FN2
-from .dataset_catalog_rel import ANN_FN3
-from .dataset_catalog_rel import DATASETS
-from .dataset_catalog_rel import IM_DIR
-from .dataset_catalog_rel import IM_PREFIX
+#### .dataset_catalog_rel: Collection of available datasets and it consists of dataset directory:
+from .dataset_catalog_rel import ANN_FN    # ANN_FN : annotation_file
+from .dataset_catalog_rel import ANN_FN2   # ANN_FN2 : annotation_file2
+from .dataset_catalog_rel import ANN_FN3   # ANN_FN3 : annotation_file3
+from .dataset_catalog_rel import DATASETS  # directory of whole of dataset consisting training image and ANN_FN, ... for different DBs 
+from .dataset_catalog_rel import IM_DIR   # dataset image 
+from .dataset_catalog_rel import IM_PREFIX  #Optional dataset entry keys
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ class JsonDatasetRel(object):
     """A class representing a COCO json dataset."""
 
     def __init__(self, name):
-        assert name in DATASETS.keys(), \
+        assert name in DATASETS.keys(), \         ##
             'Unknown dataset name: {}'.format(name)
         assert os.path.exists(DATASETS[name][IM_DIR]), \
             'Image directory \'{}\' not found'.format(DATASETS[name][IM_DIR])
@@ -68,14 +69,14 @@ class JsonDatasetRel(object):
             'Annotation file \'{}\' not found'.format(DATASETS[name][ANN_FN])
         logger.debug('Creating: {}'.format(name))
         self.name = name
-        self.image_directory = DATASETS[name][IM_DIR]
+        self.image_directory = DATASETS[name][IM_DIR]   ## it requires dataset name and directory of training images 
         self.image_prefix = (
             '' if IM_PREFIX not in DATASETS[name] else DATASETS[name][IM_PREFIX]
         )
         self.COCO = COCO(DATASETS[name][ANN_FN])
         self.debug_timer = Timer()
         # Set up dataset classes
-        category_ids = self.COCO.getCatIds()
+        category_ids = self.COCO.getCatIds()  ## getCatIds: Get cat ids that satisfy given filter conditions
         categories = [c['name'] for c in self.COCO.loadCats(category_ids)]
         self.category_to_id_map = dict(zip(categories, category_ids))
         self.classes = ['__background__'] + categories
@@ -92,7 +93,7 @@ class JsonDatasetRel(object):
 
         assert ANN_FN2 in DATASETS[name] and ANN_FN3 in DATASETS[name]
         with open(DATASETS[name][ANN_FN2]) as f:
-            self.rel_anns = json.load(f)
+            self.rel_anns = json.load(f)     
         with open(DATASETS[name][ANN_FN3]) as f:
             prd_categories = json.load(f)
         self.obj_classes = self.classes[1:]  # excludes background for now
