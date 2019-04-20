@@ -155,6 +155,8 @@ class JsonDatasetRel(object):
                 self._prep_roidb_entry(entry)
                 new_roidb.append(entry)
         roidb = new_roidb
+        ##print('roidb_len', len(roidb))   ##53953
+        ##print('roidb_sample', roidb[1])
         if gt:
             # Include ground-truth object annotations
             cache_filepath = os.path.join(self.cache_path, self.name + '_rel_gt_roidb.pkl')
