@@ -47,8 +47,10 @@ import utils_rel.boxes_rel as box_utils_rel
 from core.config import cfg
 from utils.timer import Timer
 #### .dataset_catalog_rel: Collection of available datasets and it consists of dataset directory:
-from .dataset_catalog_rel import ANN_FN    # ANN_FN : annotation_file
+from .dataset_catalog_rel import ANN_FN    # (lib/datasets_rel/dataset_catalog_rel.py) ANN_FN : annotation_file
+                                           # ANN_FN=_DATA_DIR + '/openimages_v4/rel/detections_train.json'
 from .dataset_catalog_rel import ANN_FN2   # ANN_FN2 : annotation_file2
+                                           # _DATA_DIR + '/openimages_v4/rel/rel_only_annotations_train.json'
 from .dataset_catalog_rel import ANN_FN3   # ANN_FN3 : annotation_file3
 from .dataset_catalog_rel import DATASETS  # directory of whole of dataset consisting training image and ANN_FN, ... for different DBs 
 from .dataset_catalog_rel import IM_DIR   # dataset image 
@@ -79,8 +81,8 @@ class JsonDatasetRel(object):
         category_ids = self.COCO.getCatIds()  ## getCatIds: Get cat ids that satisfy given filter conditions
         categories = [c['name'] for c in self.COCO.loadCats(category_ids)]
         self.category_to_id_map = dict(zip(categories, category_ids))
-        self.classes = ['__background__'] + categories
-        self.num_classes = len(self.classes)
+        self.classes = ['__background__'] + categories      
+        self.num_classes = len(self.classes)         ## 58
         self.json_category_id_to_contiguous_id = {
             v: i + 1
             for i, v in enumerate(self.COCO.getCatIds())
@@ -97,7 +99,7 @@ class JsonDatasetRel(object):
         with open(DATASETS[name][ANN_FN3]) as f:
             prd_categories = json.load(f)
         self.obj_classes = self.classes[1:]  # excludes background for now
-        self.num_obj_classes = len(self.obj_classes)
+        self.num_obj_classes = len(self.obj_classes)   ##57
         # self.prd_classes = ['__background__'] + prd_categories
         self.prd_classes = prd_categories  # excludes background for now
         self.num_prd_classes = len(self.prd_classes)
