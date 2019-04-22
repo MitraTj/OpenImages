@@ -18,8 +18,26 @@ from dataloaders.image_transforms import SquarePad, Grayscale, Brightness, Sharp
     RandomOrder, Hue, random_crop
 from collections import defaultdict
 from pycocotools.coco import COCO
+'''
+class openImages(Dataset):
+    """A class representing a COCO json dataset."""
 
-
+    def __init__(self, name):
+        assert name in DATASETS.keys(), \
+            'Unknown dataset name: {}'.format(name)
+        assert os.path.exists(DATASETS[name][IM_DIR]), \
+            'Image directory \'{}\' not found'.format(DATASETS[name][IM_DIR])
+        assert os.path.exists(DATASETS[name][ANN_FN]), \
+            'Annotation file \'{}\' not found'.format(DATASETS[name][ANN_FN])
+        logger.debug('Creating: {}'.format(name))
+        self.name = name
+        self.image_directory = DATASETS[name][IM_DIR]
+        self.image_prefix = (
+            '' if IM_PREFIX not in DATASETS[name] else DATASETS[name][IM_PREFIX]
+        )
+        self.COCO = COCO(DATASETS[name][ANN_FN])
+        self.debug_timer = Timer()
+'''
 class VG(Dataset):
     def __init__(self, mode, roidb_file=VG_SGG_FN, dict_file=VG_SGG_DICT_FN,
                  image_file=IM_DATA_FN, filter_empty_rels=True, num_im=-1, num_val_im=5000,
