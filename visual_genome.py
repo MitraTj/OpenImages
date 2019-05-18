@@ -13,7 +13,7 @@ from torch.utils.data import Dataset
 from torchvision.transforms import Resize, Compose, ToTensor, Normalize
 from dataloaders.blob import Blob
 from lib.fpn.box_intersections_cpu.bbox import bbox_overlaps
-from config import VG_IMAGES, IM_DATA_FN, VG_SGG_FN, VG_SGG_DICT_FN, BOX_SCALE, IM_SCALE, PROPOSAL_FN
+#from config import VG_IMAGES, IM_DATA_FN, VG_SGG_FN, VG_SGG_DICT_FN, BOX_SCALE, IM_SCALE, PROPOSAL_FN
 from dataloaders.image_transforms import SquarePad, Grayscale, Brightness, Sharpness, Contrast, \
     RandomOrder, Hue, random_crop
 from collections import defaultdict
@@ -38,11 +38,27 @@ class openImages(Dataset):
         self.COCO = COCO(DATASETS[name][ANN_FN])
         self.debug_timer = Timer()
 '''
-class VG(Dataset):
-    def __init__(self, mode, roidb_file=VG_SGG_FN, dict_file=VG_SGG_DICT_FN,
-                 image_file=IM_DATA_FN, filter_empty_rels=True, num_im=-1, num_val_im=5000,
-                 filter_duplicate_rels=True, filter_non_overlap=True,
-                 use_proposals=False):
+class V4(Dataset):
+    #def __init__(self, mode, roidb_file=VG_SGG_FN, dict_file=VG_SGG_DICT_FN,
+                # image_file=IM_DATA_FN, filter_empty_rels=True, num_im=-1, num_val_im=5000,
+               #  filter_duplicate_rels=True, filter_non_overlap=True,
+               #  use_proposals=False):
+    def __init__(self, mode, name):
+        assert name in DATASETS.keys(), \
+            'Unknown dataset name: {}'.format(name)
+        assert os.path.exists(DATASETS[name][IM_DIR]), \
+            'Image directory \'{}\' not found'.format(DATASETS[name][IM_DIR])
+        assert os.path.exists(DATASETS[name][ANN_FN]), \
+            'Annotation file \'{}\' not found'.format(DATASETS[name][ANN_FN])
+        logger.debug('Creating: {}'.format(name))
+        self.name = name
+        self.image_directory = DATASETS[name][IM_DIR]
+        self.image_prefix = (
+            '' if IM_PREFIX not in DATASETS[name] else DATASETS[name][IM_PREFIX]
+        )
+        self.COCO = COCO(DATASETS[name][ANN_FN])
+        self.debug_timer = Timer()
+        
         """
         Torch dataset for VisualGenome
         :param mode: Must be train, test, or val
