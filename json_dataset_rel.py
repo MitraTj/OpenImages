@@ -80,34 +80,44 @@ class JsonDatasetRel(object):
         self.debug_timer = Timer()
         # Set up dataset classes
         category_ids = self.COCO.getCatIds()  ## getCatIds: Get cat ids that satisfy given filter conditions
+        # category_ids= [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]
         categories = [c['name'] for c in self.COCO.loadCats(category_ids)]
+        #  ['Piano', 'Boy', 'Tennis ball', 'Van', 'Football', 'Beer', 'Camera', 'Suitcase', 
+       # ,'Man', 'Bench', 'Dolphin', 'Motorcycle', 'Mug', 'Tennis racket', 'Drum', 'Spoon', 'Horse', 'Surfboard', 'Bicycle', 'Knife', 
+      #'Rugby ball', 'Woman', 'Handbag', 'Microwave oven', 'Flute', 'Girl', 'Taxi', 'Hamster', 'Wine glass', 'Backpack', 'Racket', 'Table', 'Pretzel', 'Bed', 'Snowboard', 'Car', 'Chair', 'Microphone', 'Coffee cup', 
+      # 'Table tennis racket', 'Bottle', 'Guitar', 'Desk', 'Ski', 'Coffee table', 'Dog', 'Cat', 'Chopsticks', 'Elephant', 'Mobile phone', 'Monkey', 'Snake', 'Sofa bed', 'Violin', 'Fork', 'Oven', 'Briefcase']
+      # categories_len = 57
         self.category_to_id_map = dict(zip(categories, category_ids))
-        self.classes = ['__background__'] + categories      
+        self.classes = ['__background__'] + categories
+        # self.classes =  ['__background__', 'Piano', 'Boy', 'Tennis ball', 'Van', 'Football', 'Beer', 'Camera', 'Suitcase', 'Man', 'Bench', 'Dolphin', 'Motorcycle', 'Mug', 'Tennis racket', 'Drum', 'Spoon', 'Horse', 'Surfboard', 'Bicycle', 'Knife', 
+        #'Rugby ball', 'Woman', 'Handbag', 'Microwave oven', 'Flute', 'Girl', 'Taxi', 'Hamster', 'Wine glass', 'Backpack', 'Racket', 'Table', 'Pretzel', 'Bed', 'Snowboard', 'Car', 'Chair', 'Microphone', 'Coffee cup', 
+        #'Table tennis racket', 'Bottle', 'Guitar', 'Desk', 'Ski', 'Coffee table', 'Dog', 'Cat', 'Chopsticks', 'Elephant', 'Mobile phone', 'Monkey', 'Snake', 'Sofa bed', 'Violin', 'Fork', 'Oven', 'Briefcase']
         self.num_classes = len(self.classes)         ## 58
-        self.json_category_id_to_contiguous_id = {
+        self.json_category_id_to_contiguous_id = {     ##57
             v: i + 1
             for i, v in enumerate(self.COCO.getCatIds())
         }
-        self.contiguous_category_id_to_json_id = {
+        self.contiguous_category_id_to_json_id = {     #57
             v: k
-            for k, v in self.json_category_id_to_contiguous_id.items()
+            for k, v in self.json_category_id_to_contiguous_id.items()   
         }
-        self._init_keypoints()
+        self._init_keypoints()   
 
         assert ANN_FN2 in DATASETS[name] and ANN_FN3 in DATASETS[name]
         with open(DATASETS[name][ANN_FN2]) as f:
-            self.rel_anns = json.load(f)     
+            self.rel_anns = json.load(f)   ##self.rel_anns_len-- 53953  
         with open(DATASETS[name][ANN_FN3]) as f:
-            prd_categories = json.load(f)
+            prd_categories = json.load(f)      ##prd_categories_len-- 9
         self.obj_classes = self.classes[1:]  # excludes background for now
         self.num_obj_classes = len(self.obj_classes)   ##57
         # self.prd_classes = ['__background__'] + prd_categories
         self.prd_classes = prd_categories  # excludes background for now
-        self.num_prd_classes = len(self.prd_classes)
+        ##prd_categories: ['at', 'on', 'holds', 'plays', 'interacts_with', 'wears', 'inside_of', 'under', 'hits']
+        self.num_prd_classes = len(self.prd_classes)   ##9
 
     @property
     def cache_path(self):
-        cache_path = os.path.abspath(os.path.join(cfg.DATA_DIR, 'cache'))
+        cache_path = os.path.abspath(os.path.join(cfg.DATA_DIR, 'cache'))   ## /data1/MitraTj/Proj/MarApr/ContrastiveLosses4VRD/data/cache
         if not os.path.exists(cache_path):
             os.makedirs(cache_path)
         return cache_path
@@ -144,12 +154,14 @@ class JsonDatasetRel(object):
         assert gt is True or crowd_filter_thresh == 0, \
             'Crowd filter threshold must be 0 if ground-truth annotations ' \
             'are not included.'
-        image_ids = self.COCO.getImgIds()
+        image_ids = self.COCO.getImgIds()     ##########image_ids_len 745272
+        
         image_ids.sort()
         if cfg.DEBUG:
             roidb = copy.deepcopy(self.COCO.loadImgs(image_ids))[:100]
         else:
             roidb = copy.deepcopy(self.COCO.loadImgs(image_ids))
+            ## self.COCO.loadImgs(image_ids)= 745272
         new_roidb = []
         for entry in roidb:
             # In OpenImages_v4, the detection-annotated images are more than relationship
@@ -158,8 +170,12 @@ class JsonDatasetRel(object):
                 self._prep_roidb_entry(entry)
                 new_roidb.append(entry)
         roidb = new_roidb
-        ##print('roidb_len', len(roidb))   ##53953
-        ##print('roidb_sample', roidb[1])
+        ##print('roidb_len', len(roidb))   ##53953  
+        ##print('roidb_sample', roidb[200])   :  roidb_sample200 {'file_name': 'd568be13d9bb5a57.jpg', 'height': 1024, 'width': 683, 'id': 2934, 'dataset': <datasets_rel.json_dataset_rel.JsonDatasetRel object at 0x7f5b3dc0e208>, 'image': '/data1/MitraTj/Proj/MarApr/ContrastiveLosses4VRD/data/openimages_v4/train/d568be13d9bb5a57.jpg', 'flipped': False, 'has_visible_keypoints': False, 'boxes': array([], shape=(0, 4), dtype=float32), 'segms': [], 'gt_classes': array([], dtype=int32), 'seg_areas': array([], dtype=float32), 'gt_overlaps': <0x58 sparse matrix of type '<class 'numpy.float32'>'
+       # with 0 stored elements in Compressed Sparse Row format>, 'is_crowd': array([], dtype=bool), 'box_to_gt_ind_map': array([], dtype=int32), 'dataset_name': '', 'sbj_gt_boxes': array([], shape=(0, 4), dtype=float32), 'sbj_gt_classes': array([], dtype=int32), 'sbj_gt_overlaps': <0x57 sparse matrix of type '<class 'numpy.float32'>'
+       # with 0 stored elements in Compressed Sparse Row format>, 'obj_gt_boxes': array([], shape=(0, 4), dtype=float32), 'obj_gt_classes': array([], dtype=int32), 'obj_gt_overlaps': <0x57 sparse matrix of type '<class 'numpy.float32'>'
+       # with 0 stored elements in Compressed Sparse Row format>, 'prd_gt_classes': array([], dtype=int32), 'prd_gt_overlaps': <0x9 sparse matrix of type '<class 'numpy.float32'>'
+       # with 0 stored elements in Compressed Sparse Row format>, 'pair_to_gt_ind_map': array([], dtype=int32)}
         if gt:
             # Include ground-truth object annotations
             cache_filepath = os.path.join(self.cache_path, self.name + '_rel_gt_roidb.pkl')
@@ -203,7 +219,7 @@ class JsonDatasetRel(object):
         # Make file_name an abs path
         im_path = os.path.join(
             self.image_directory, self.image_prefix + entry['file_name']
-        )
+        )     ###im_path= /data1/MitraTj/Proj/MarApr/ContrastiveLosses4VRD/data/openimages_v4/train/7b992e3492f2f263.jpg .......
         assert os.path.exists(im_path), 'Image \'{}\' not found'.format(im_path)
         entry['image'] = im_path
         entry['flipped'] = False
