@@ -70,7 +70,7 @@ class JsonDatasetRel(object):
         assert os.path.exists(DATASETS[name][ANN_FN]), \
             'Annotation file \'{}\' not found'.format(DATASETS[name][ANN_FN])
         logger.debug('Creating: {}'.format(name))
-        self.name = name
+        self.name = name     ##oi_rel_train
         self.image_directory = DATASETS[name][IM_DIR]   ## it requires dataset name and directory of training images:
         # self.image_directory= /data1/MitraTj/Proj/MarApr/ContrastiveLosses4VRD/data/openimages_v4/train
         self.image_prefix = (
