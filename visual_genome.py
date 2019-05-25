@@ -270,7 +270,8 @@ def assertion_checks(entry):
     assert (entry['gt_boxes'] >= -1).all()
 
 
-def load_image_filenames(image_file, image_dir=VG_IMAGES):
+#def load_image_filenames(image_file, image_dir=VG_IMAGES):
+def load_image_filenames(image_file, image_dir=V4_IMAGES):
     """
     Loads the image filenames from visual genome from the JSON file that contains them.
     This matches the preprocessing in scene-graph-TF-release/data_tools/vg_to_imdb.py.
@@ -288,10 +289,12 @@ def load_image_filenames(image_file, image_dir=VG_IMAGES):
         if basename in corrupted_ims:
             continue
 
-        if os.path.exists(os.path.join(image_dir, 'VG_100K', basename)):
-            filename = os.path.join(image_dir, 'VG_100K', basename)
-        elif os.path.exists(os.path.join(image_dir, 'VG_100K_2', basename)):
-            filename = os.path.join(image_dir, 'VG_100K_2', basename)
+       # if os.path.exists(os.path.join(image_dir, 'VG_100K', basename)):
+        #    filename = os.path.join(image_dir, 'VG_100K', basename)
+       # elif os.path.exists(os.path.join(image_dir, 'VG_100K_2', basename)):
+          #  filename = os.path.join(image_dir, 'VG_100K_2', basename)
+        if os.path.exists(os.path.join(image_dir, 'train', basename)):
+            filename = os.path.join(image_dir, 'train', basename)
         else:
             raise NotImplementedError
         
