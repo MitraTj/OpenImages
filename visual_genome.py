@@ -19,31 +19,11 @@ from dataloaders.image_transforms import SquarePad, Grayscale, Brightness, Sharp
 from collections import defaultdict
 from pycocotools.coco import COCO
 '''
-class openImages(Dataset):
-    """A class representing a COCO json dataset."""
 
-    def __init__(self, name):
-        assert name in DATASETS.keys(), \
-            'Unknown dataset name: {}'.format(name)
-        assert os.path.exists(DATASETS[name][IM_DIR]), \
-            'Image directory \'{}\' not found'.format(DATASETS[name][IM_DIR])
-        assert os.path.exists(DATASETS[name][ANN_FN]), \
-            'Annotation file \'{}\' not found'.format(DATASETS[name][ANN_FN])
-        logger.debug('Creating: {}'.format(name))
-        self.name = name
-        self.image_directory = DATASETS[name][IM_DIR]
-        self.image_prefix = (
-            '' if IM_PREFIX not in DATASETS[name] else DATASETS[name][IM_PREFIX]
-        )
-        self.COCO = COCO(DATASETS[name][ANN_FN])
-        self.debug_timer = Timer()
 '''
 class V4(Dataset):
-    #def __init__(self, mode, roidb_file=VG_SGG_FN, dict_file=VG_SGG_DICT_FN,
-                # image_file=IM_DATA_FN, filter_empty_rels=True, num_im=-1, num_val_im=5000,
-               #  filter_duplicate_rels=True, filter_non_overlap=True,
-               #  use_proposals=False):
-    def __init__(self, mode, name):
+    def __init__(self, mode, name, filter_duplicate_rels=True, filter_non_overlap=True,
+                 use_proposals=False):
         assert name in DATASETS.keys(), \
             'Unknown dataset name: {}'.format(name)
         assert os.path.exists(DATASETS[name][IM_DIR]), \
@@ -51,13 +31,34 @@ class V4(Dataset):
         assert os.path.exists(DATASETS[name][ANN_FN]), \
             'Annotation file \'{}\' not found'.format(DATASETS[name][ANN_FN])
         logger.debug('Creating: {}'.format(name))
+        
+        if mode not in ('test', 'train', 'val'):
+            raise ValueError("Mode must be in test, train, or val. Supplied {}".format(mode))
+        self.mode = mode
+        
         self.name = name
-        self.image_directory = DATASETS[name][IM_DIR]
+        self.image_directory = DATASETS[name][IM_DIR]   ## it requires dataset name and directory of training images:
+        # self.image_directory= /data1/MitraTj/Proj/MarApr/ContrastiveLosses4VRD/data/openimages_v4/train
         self.image_prefix = (
             '' if IM_PREFIX not in DATASETS[name] else DATASETS[name][IM_PREFIX]
         )
         self.COCO = COCO(DATASETS[name][ANN_FN])
         self.debug_timer = Timer()
+        # Set up dataset classes
+        category_ids = self.COCO.getCatIds()  ## getCatIds: Get cat ids that satisfy given filter conditions
+        categories = [c['name'] for c in self.COCO.loadCats(category_ids)]
+        self.category_to_id_map = dict(zip(categories, category_ids))
+        self.classes = ['__background__'] + categories
+        self.num_classes = len(self.classes)         ## 58
+        self.json_category_id_to_contiguous_id = {     ##57
+            v: i + 1
+            for i, v in enumerate(self.COCO.getCatIds())
+        }
+        self.contiguous_category_id_to_json_id = {     #57
+            v: k
+            for k, v in self.json_category_id_to_contiguous_id.items()   
+        }
+        self._init_keypoints()   
         
         """
         Torch dataset for VisualGenome
@@ -74,9 +75,6 @@ class V4(Dataset):
         :param proposal_file: If None, we don't provide proposals. Otherwise file for where we get RPN
             proposals
         """
-        if mode not in ('test', 'train', 'val'):
-            raise ValueError("Mode must be in test, train, or val. Supplied {}".format(mode))
-        self.mode = mode
 
         # Initialize
         self.roidb_file = roidb_file
